@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/TaskProject/bin/Debug/net8.0
+/TaskProject/obj
+/TaskProject.Domain/obj
+/TaskProject.Repositories/obj
+/TaskProject.Services/bin/Debug/net8.0
+/TaskProject.Services/obj
+/TaskProject.Repositories/bin/Debug/net8.0
+/TaskProject.Domain/bin/Debug/net8.0
