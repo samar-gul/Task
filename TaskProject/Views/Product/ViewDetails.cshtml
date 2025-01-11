@@ -1,0 +1,83 @@
+﻿@using TaskProject.Domain.Product
+@model ProductDetailVM
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+
+<div class="modal-header">
+    <h5>View Product Detail</h5>
+</div>
+
+<div class="modal-body">
+    <!-- Category -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="CategoryID" class="form-label"><strong>Category:</strong></label>
+            <label>@Model.CategoryName</label>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="ProductName" class="form-label"><strong>Product Name:</strong> </label>
+            <span>@Model.ProductName</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- SKU -->
+        <div class="col-md-6 mb-3">
+            <label for="SKU" class="form-label"><strong>Product SKU:</strong></label>
+            <span>@Model.SKU</span>
+        </div>
+
+        <!-- Price -->
+        <div class="col-md-6 mb-3">
+            <label for="Price" class="form-label"><strong>Product Price:</strong></label>
+            <span>@Model.Price</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Stock Quantity -->
+        <div class="col-md-6 mb-3">
+            <label for="StockQuantity" class="form-label"><strong>Open Quantity:</strong></label>
+            <span>@Model.StockQuantity</span>
+        </div>
+
+        <!-- Status (Active/Inactive) -->
+        <div class="col-md-6 mb-3">
+            <label for="IsActive" class="form-label"><strong>Status:</strong></label>
+            <span>@(Model.IsActive ? "Active" : "Inactive")</span>
+        </div>
+    </div>
+
+    <!-- Product Images -->
+    <div class="col-md-12 mb-3">
+        <label class="form-label">Product Images</label>
+        <hr />
+        <div id="productImagesContainer" class="row">
+            @if (Model.Images != null && Model.Images.Any())
+            {
+                @foreach (var image in Model.Images)
+                {
+                    <div class="col-sm-6 col-md-3 mb-3">
+                        <div class="image-preview text-center">
+                            <img src="@Url.Content(image.ImagePath)" alt="Product Image" class="img-fluid img-thumbnail" style="max-width: 100%;" />
+                            <p>@image.FileName</p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p>No images available.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <a class="btn btn-outline-dark" href="@Url.Action("List", "Product")">
+        <i class="fa fa-home"></i> Back
+    </a>
+</div>

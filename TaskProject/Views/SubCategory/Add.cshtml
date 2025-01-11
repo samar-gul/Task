@@ -1,0 +1,120 @@
+﻿@using TaskProject.Domain.SubCategory
+@model SubCategoryViewModel
+@{
+    ViewData["Title"] = "Sub Category";
+}
+<form id="categoryForm"
+      data-ajax="true"
+      data-ajax-method="post"
+      data-ajax-success="onSuccess"
+      data-ajax-failure="onFailure"
+      enctype="multipart/form-data"
+      asp-action="Add"
+      asp-controller="SubCategory">
+
+    <div class="modal-header">
+        <h5>Add New Subcategory</h5>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+               <label for="Title" class="form-label">Category</label>
+            <select asp-for="CategoryID" name="CategoryID" class="form-control" id="Category">
+               <option value="">--Select Category--</option>
+                @if(ViewBag.CategoryDropdown != null)
+                   {
+                    foreach (var item in ViewBag.CategoryDropdown)
+                      {
+                       <option value="@item.ID">@item.Name</option>
+                     }
+                 }
+               </select>
+             <span class="text-danger" asp-validation-for="CategoryID"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Title" class="form-label">Category Title</label>
+            <input asp-for="Title" class="form-control" id="Title" name="Title" placeholder="Category title" />
+            <span class="text-danger" asp-validation-for="Title"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="IsActive" class="form-label">Status</label>
+            <select class="form-select" id="IsActive" name="IsActive" asp-for="IsActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <span class="text-danger" asp-validation-for="IsActive"></span>
+        </div>
+        </div>
+        <div class="mb-3">
+            <label for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" id="Description" name="Description" placeholder="Category description"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+        <a  class="btn btn-outline-dark"  href="@Url.Action("List","SubCategory")">
+            <i class="fa fa-home"></i> Back</a>
+    </div>
+</form>
+
+
+@section scripts {
+  
+    <script>
+        $('#categoryForm').submit(function (e) {
+            e.preventDefault();
+            var form = $(this)[0];
+            var formData = new FormData(form);
+
+            if ($(form).valid()) {
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $('#modal').modal('hide');
+                            $('#categoryForm')[0].reset();
+                            getCategoryDropdown();
+                        } else if (!response.success) {
+                            alert("Error: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        alert("An error occurred while submitting the form. Please try again.");
+                    }
+                });
+            }
+        });
+
+
+        function getCategoryDropdown() {
+            $.ajax({
+                type: 'GET',
+                url: '/SubCategory/GetCategoryDropdown',
+                dataType: 'json',
+                success: function (response) {
+                    $('#Category').empty();
+
+                    $('#Category').append('<option value="">--Select Category--</option>');
+                    $.each(response, function (index, product) {
+                        $('#Category').append(
+                            '<option value="' + product.id + '">' + product.name + '</option>'
+                        );
+                    });
+                },
+                error: function () {
+                    alert("An error occurred while loading the products.");
+                }
+            });
+        }
+    </script>
+}

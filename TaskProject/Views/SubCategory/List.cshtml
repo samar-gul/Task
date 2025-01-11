@@ -1,0 +1,203 @@
+﻿@using TaskProject.Domain.SubCategory
+
+@{
+    ViewData["Title"] = "SubCategory List";
+}
+
+<h5>Sub-Category List</h5>
+<div class="row mb-2">
+    <form id="form-search" class="col-md-12">
+        <input type="hidden" id="hidcurrentindexemp" value="0" name="PageIndex" />
+        <input type="hidden" id="hidemppagesize" name="PageSize" value="10" />
+        <input type="hidden" id="hiddenTotalRecord" value="" />
+        <input type="hidden" id="hiddenParentCategoryId" value="" />
+        <input type="hidden" id="hiddenCategoryId" value="" />
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="Search" class="form-control" placeholder="Search Sub-Categories..." />
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="IsActive" name="IsActive">
+                    <option value="null">All</option>
+                    <option value="1" selected="selected">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary" onclick="getSubCategoryList()">
+                    <i class="fa fa-search"></i> Search
+                </button>
+            </div>
+            <div class="col-md-3 text-end">
+                <a href="@Url.Action("Add","SubCategory")" class="btn btn-success" id="openCreateModal">
+                    <i class="fa fa-plus"></i> Add New SubCategory
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="row mb-2">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered" id="categoriesTable">
+            <thead>
+                <tr>
+                    <th scope="col">SrNo</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Path</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6" id="div-pageinfo">
+    </div>
+    <div class="col-sm-6 text-end">
+        <div id="div-pages">
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade ModalForm" id="modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" id="modalContent">
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <script>
+
+          $('form').submit(function (e) {
+              e.preventDefault();
+          });
+          $('form').keypress(function (e) {
+              if (e.keyCode == 13) {
+                  getSubCategoryList();
+                  return;
+              }
+          });
+
+          $(document).ready(function () {
+              getSubCategoryList();
+          });
+
+          $("#btnsearch").click(function () {
+              $("#hidcurrentindexemp").val(0);
+              getSubCategoryList();
+          });
+
+          function getSubCategoryList() {
+              var valdata = $("#form-search").serialize();
+              $.ajax({
+                  url: "/SubCategory/List",
+                  type: "POST",
+                  dataType: 'json',
+                  contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                  data: valdata,
+                  async: true,
+                  success: function (response) {
+                      debugger;
+                      var TotalRecord = 0;
+                      if (response.data.length > 0) {
+                          TotalRecord = response.data[0].totalRecord;
+                      }
+                      $('#hiddenTotalRecord').val(TotalRecord);
+                    
+                      
+                      var grid = '';
+                      if (TotalRecord === 0) {
+                          grid += '<tr><td colspan="6" style="text-align:center"><div class="NotFound"><i class="fa fa-recycle"></i><strong>No Records Found.</strong></div></td></tr>';
+                          $('#div-pageinfo').html('');
+                          $('#categoriesTable tbody').html(grid);
+                      } else {
+                          var tableBody = $('#categoriesTable tbody');
+                          tableBody.empty();
+                          $.each(response.data, function (index, item) {
+                              var row = $('<tr></tr>');
+                              row.append('<td hidden >' + item.categoryID + '</td>');
+                                row.append('<td hidden >' + item.parentCategoryID + '</td>');
+                              row.append('<td>' + item.srNo + '</td>');
+                              row.append('<td>' + (item.title ? item.title : 'N/A') + '</td>');
+                              row.append('<td>' + item.description + '</td>');
+                              row.append('<td>' + item.path + '</td>');
+                              row.append('<td><span class="badge ' + (item.isActive ? 'bg-success' : 'bg-danger') + '">' + (item.isActive ? 'Active' : 'Inactive') + '</span></td>');
+                            var actionButtons = $('<td></td>');
+                             actionButtons.append('<button class="btn btn-primary btn-sm edit-btn "onclick="edit(' + item.categoryID + ')" ><i class="fa fa-edit" ></i></button> | <button class="btn btn-danger btn-sm edit-btn" onclick="deletedSubcategory(' + item.categoryID + ')"><i class="fa fa-trash" ></i></button>');
+
+                              row.append(actionButtons);
+                              tableBody.append(row);
+                          });
+                      }
+                      Pagination($('#hiddenTotalRecord').val(), $("#hidcurrentindexemp").val(), $("#hidemppagesize").val(), "#qemp", "qemp", '', '');
+                  },
+                  error: function (xhr, textStatus, errorThrown) {
+                      alter('Please try again!', "error");
+                  }
+              });
+          }
+        function edit(categoryId) {
+            window.location.href = '/SubCategory/EditSubCategory/' + categoryId;
+        }
+
+
+          function Search(pagenumber) {
+              $("#hidcurrentindexemp").val(pagenumber);
+              getSubCategoryList();
+          }
+
+
+          function addNewSubCategory(Id) {
+              openCreateOrEditModal(1)
+          }
+
+          function openCreateOrEditModal(Id) {
+              let Url = `/SubCategory/CreateOrEdit/${Id}`; // Pass the ID as part of the URL
+              console.log("URL: " + Url);  // Check if the URL is correct
+              if (Url) {
+                  $.get(Url, function (data) {
+                      $('#modalContent').html(data);
+                      $.validator.unobtrusive.parse('.ModalForm');
+                      $('#modal').modal('show');
+                  });
+              }
+          }
+           function deletedSubcategory(Id) {
+            if (confirm('Are you sure you want to delete this subcategory?')) {
+                deletedSubCategoryById(Id);
+            }
+        }
+
+        function deletedSubCategoryById(id) {
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'JSON',
+                        url: '/Category/Delete',
+                        data: { CategoryID: id },
+                        success: function (response) {
+                            if (response == "Success") {
+                                $('#txt-pgno').val(0);
+                                alert("sub category deleted successfully");
+                                getCategoryList();
+                            }
+                            else {
+                                alert("Error while deleting data");
+                            }
+                        },
+                        error: function () {
+                            alert("Error while deleting data");
+                        }
+                    });
+                }
+
+    </script>
+}

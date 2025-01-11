@@ -1,0 +1,125 @@
+﻿@using TaskProject.Domain.Category
+@model CategoryDetailViewModel
+
+<form id="editCategoryForm"
+      enctype="multipart/form-data"
+      asp-action="EditCategory"
+      asp-controller="Category"
+      method="post">
+
+    <div class="modal-header">
+        <h5>Edit Category</h5>
+    </div>
+    <input type="hidden" id="hiddenIcon" value="@Model.Icon" name="Icon" />
+    <input type="hidden" id="CategoryID" value="@Model.CategoryID" name="CategoryID" />
+
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="Title" class="form-label">Category Title</label>
+            <input asp-for="Title" class="form-control" id="Title" name="Title" placeholder="Category title" />
+            <span class="text-danger" asp-validation-for="Title"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="IsActive" class="form-label">Status</label>
+            <select class="form-select" id="IsActive" name="IsActive" asp-for="IsActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <span class="text-danger" asp-validation-for="IsActive"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Icon" class="form-label">Category Icon (Image Upload)</label>
+            <div id="iconPreview" class="mb-3">
+                @if (!string.IsNullOrEmpty(Model.Icon))
+                {
+                    <img src="data:image/jpeg;base64,@Model.Icon" id="currentIcon" alt="Category Icon" class="img-thumbnail" style="max-width: 100px;" />
+                }
+                else
+                {
+                    <p>No icon available</p>
+                }
+            </div>
+            <input asp-for="IconFile" type="file" class="form-control" id="IconFile" name="IconFile" accept="image/*" onchange="previewImage(event)" />
+            <span class="text-danger" asp-validation-for="IconFile"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Description" class="form-label">Category Description</label>
+            <textarea asp-for="Description" class="form-control" id="Description" name="Description" placeholder="Category description"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label class="form-label">Image Previews</label>
+            <div id="productImagesContainer" class="row">
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+         <a  class="btn btn-outline-dark"  href="@Url.Action("List","Category")">
+           <i class="fa fa-home"></i> Back</a>
+    </div>
+</form>
+
+@section scripts {
+    <script>
+        $('#editCategoryForm').submit(function (e) {
+            e.preventDefault();
+
+            var form = $(this)[0];
+            var formData = new FormData(form);
+
+            if ($(form).valid()) {
+                $.ajax({
+                    url: '@Url.Action("EditCategory", "Category")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $('#modal').modal('hide');
+                            $('#editCategoryForm')[0].reset();
+                        } else {
+                            alert("Error: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        console.log("Response:", xhr.responseText); 
+                        alert("An error occurred while submitting the form. Please try again.");
+                    }
+                });
+            }
+        });
+
+        function previewImages(event) {
+            var files = event.target.files;
+            var container = document.getElementById("productImagesContainer");
+            container.innerHTML = ""; 
+
+            for (let i = 0; i < files.length; i++) { 
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var imageElement = document.createElement("div");
+                    imageElement.classList.add("col-sm-6", "col-md-3", "mb-3");
+
+                    imageElement.innerHTML = `
+                                        <div class="image-preview text-center">
+                                            <img src="${e.target.result}" alt="Product Image" class="img-fluid img-thumbnail" style="max-width: 100%;" />
+                                            <p>${files[i].name}</p>  <!-- Correctly reference the image name -->
+                                        </div>
+                                    `;
+                    container.appendChild(imageElement);
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        }
+    </script>
+}
+

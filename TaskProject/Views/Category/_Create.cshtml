@@ -1,0 +1,64 @@
+﻿@using TaskProject.Domain.Category
+@model CategoryViewModel
+@{
+    ViewData["Title"] = "Add Category";
+}
+
+@{
+    Layout = null; 
+}
+
+<form id="categoryForm"
+      data-ajax="true"
+      data-ajax-method="post"
+      data-ajax-success="onSuccess"
+      data-ajax-failure="onFailure"
+      enctype="multipart/form-data"
+      asp-action="CreateCategory"
+      asp-controller="Category">
+
+    <div class="modal-header">
+        <h3>Add New Category</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="mb-3">
+            <label for="Title" class="form-label">Category Title</label>
+            <input asp-for="Title" class="form-control" id="Title" name="Title" placeholder="Category title" />
+            <span class="text-danger" asp-validation-for="Title"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="IsActive" class="form-label">Status</label>
+            <select class="form-select" id="IsActive" name="IsActive" asp-for="IsActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <span class="text-danger" asp-validation-for="IsActive"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Icon" class="form-label">Category Icon (Image Upload)</label>
+            <input asp-for="Icon" type="file" class="form-control" id="Icon" name="Icon" accept="image/*" />
+            <span class="text-danger" asp-validation-for="Icon"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Description" class="form-label">Category Description</label>
+            <textarea asp-for="Description" class="form-control" id="Description" name="Description" placeholder="Category description"></textarea>
+            <span class="text-danger" asp-validation-for="Description"></span>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal"> Close</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+}
+

@@ -1,0 +1,142 @@
+﻿@using TaskProject.Domain.Product
+@model ProductViewModel
+@{
+    ViewData["Title"] = "Add New Product";
+}
+
+<form id="productForm" data-ajax="true" data-ajax-method="post" data-ajax-success="onSuccess"
+      data-ajax-failure="onFailure" enctype="multipart/form-data" asp-action="Add" asp-controller="Product">
+
+    <div class="modal-header">
+        <h5>Add New Product</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="CategoryID" class="form-label">Category</label>
+                <select asp-for="CategoryID" name="CategoryID" class="form-control">
+                    <option value="">--Select Category--</option>
+                    @if (ViewBag.CategoryDropdown != null)
+                    {
+                        foreach (var item in ViewBag.CategoryDropdown)
+                        {
+                            <option value="@item.ID">@item.Name</option>
+                        }
+                    }
+                </select>
+                <span class="text-danger" asp-validation-for="CategoryID"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="ProductName" class="form-label">Product Name</label>
+                <input asp-for="ProductName" class="form-control" id="ProductName" name="ProductName" placeholder="Product Name" />
+                <span class="text-danger" asp-validation-for="ProductName"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="SKU" class="form-label">Product SKU</label>
+                <input asp-for="SKU" class="form-control" id="SKU" name="SKU" placeholder="Product SKU" />
+                <span class="text-danger" asp-validation-for="SKU"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="Price" class="form-label">Product Price</label>
+                <input asp-for="Price" class="form-control" id="Price" name="Price" placeholder="Product Price" />
+                <span class="text-danger" asp-validation-for="Price"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="StockQuantity" class="form-label">Open Quantity</label>
+                <input asp-for="StockQuantity" class="form-control" id="StockQuantity" name="StockQuantity" placeholder="Open Quantity" />
+                <span class="text-danger" asp-validation-for="StockQuantity"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="IsActive" class="form-label">Status</label>
+                <select class="form-select" id="IsActive" name="IsActive" asp-for="IsActive">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+                <span class="text-danger" asp-validation-for="IsActive"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="ImageFiles" class="form-label">Category Icon (Image Upload)</label>
+                <input asp-for="ImageFiles" type="file" class="form-control" id="ImageFiles" name="ImageFiles" accept="image/*" multiple onchange="previewImages(event)" />
+                <span class="text-danger" asp-validation-for="ImageFiles"></span>
+            </div>
+        </div>
+        <div class="col-md-12 mb-3">
+            <label class="form-label">Image Previews</label>
+            <div id="productImagesContainer" class="row">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+        <a class="btn btn-outline-dark" href="@Url.Action("List","Product")">
+            <i class="fa fa-home"></i> Back
+        </a>
+    </div>
+</form>
+
+@section scripts {
+
+    <script>
+        $('#productForm').submit(function (e) {
+            e.preventDefault();
+            var form = $(this)[0];
+            var formData = new FormData(form);
+
+            if ($(form).valid()) {
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            $('#productForm')[0].reset();
+                        } else if (!response.success) {
+                            alert("Error: " + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        alert("An error occurred while submitting the form. Please try again.");
+                    }
+                });
+            }
+        });
+
+
+        function previewImages(event) {
+            var files = event.target.files;
+            var container = document.getElementById("productImagesContainer");
+            container.innerHTML = ""; // Clear previous previews
+
+            for (let i = 0; i < files.length; i++) {  // Use `let` here
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var imageElement = document.createElement("div");
+                    imageElement.classList.add("col-sm-6", "col-md-3", "mb-3");
+
+                    imageElement.innerHTML = `
+                        <div class="image-preview text-center">
+                            <img src="${e.target.result}" alt="Product Image" class="img-fluid img-thumbnail" style="max-width: 100%;" />
+                            <p>${files[i].name}</p>  <!-- Correctly reference the image name -->
+                        </div>
+                    `;
+                    container.appendChild(imageElement);
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        }
+    </script>
+}
